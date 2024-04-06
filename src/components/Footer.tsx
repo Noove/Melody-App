@@ -3,10 +3,9 @@ import { Volume, Volume1, Volume2, Play, Square, Settings } from "lucide-react";
 import CircleButton from "./CircleButton";
 
 const Footer = () => {
-  const [volume, setVolume] = useState(50);
+  const [volume, setVolume] = useState(75);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  console.log(isPlaying);
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.code === "Space") {
@@ -40,19 +39,32 @@ const Footer = () => {
           />
         </div>
 
-        <span className="mr-10 text-2xl text-white">00:00.00</span>
+        <span className="mb-1 mr-5 flex justify-self-center text-2xl">
+          00:00.00
+        </span>
 
         <CircleButton
+          className="mr-20"
           icon={isPlaying ? <Square color="#fff" /> : <Play color="#fff" />}
           onClick={() => setIsPlaying(!isPlaying)}
         />
+
+        {/* add bpm input */}
+        <div className="mb-1 flex items-center text-xl">
+          <input
+            type="text"
+            defaultValue={120}
+            className="mr-2 h-12 w-16 rounded-md bg-white/10 text-center text-white"
+          ></input>
+          <span className="text-white">BPM</span>
+        </div>
 
         <CircleButton
           className="ml-auto mr-10"
           icon={<Settings color="#fff" />}
         />
 
-        <button className="text-l flex h-12 items-center justify-center rounded-md bg-highlight px-4 text-white">
+        <button className="text-l bg-highlight mb-1 flex h-12 items-center justify-center rounded-md px-4">
           {(window as any).chrome ? "Send to device" : "Save to file"}
         </button>
       </footer>

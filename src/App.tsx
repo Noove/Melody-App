@@ -1,9 +1,11 @@
 import PianoRoll from "./components/PianoRoll";
 import Footer from "./components/Footer";
 import TopBar from "./components/TopBar";
+import { ThemeProvider } from "@/components/ThemeProvider";
+
 function App() {
   return (
-    <>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <div className="flex h-screen w-full flex-col bg-black">
         {/* TOP CONTENT */}
         <TopBar />
@@ -19,7 +21,7 @@ function App() {
         {/* FOOTER */}
         <Footer />
       </div>
-    </>
+    </ThemeProvider>
   );
 }
 
