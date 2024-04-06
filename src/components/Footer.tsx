@@ -5,6 +5,7 @@ import CircleButton from "./CircleButton";
 const Footer = () => {
   const [volume, setVolume] = useState(75);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [bpm, setBpm] = useState(120);
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -53,8 +54,9 @@ const Footer = () => {
         <div className="mb-1 flex items-center text-xl">
           <input
             type="text"
-            defaultValue={120}
+            defaultValue={bpm}
             className="mr-2 h-12 w-16 rounded-md bg-white/10 text-center text-white"
+            onChange={(e) => setBpm(parseInt(e.target.value))}
           ></input>
           <span className="text-white">BPM</span>
         </div>
