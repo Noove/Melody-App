@@ -10,4 +10,9 @@
     font-weight: 400;
     font-style: normal;
   }
+
+  html,
+  body {
+    @apply overflow-hidden;
+  }
 }

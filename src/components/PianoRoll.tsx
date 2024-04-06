@@ -35,19 +35,22 @@ const PianoRoll = () => {
     const width = canvasRef.current.width;
     const height = canvasRef.current.height;
 
-    for (let i = 0; i < height / dh; i++) {
-      context.save();
-
+    for (let i = 0; i < (height - 50) / dh; i++) {
       context.fillStyle = i % 2 === 0 ? "rgb(15,15,15)" : "rgb(20,20,20";
-      context.fillRect(0, i * dh, width, i * dh + dh);
-      context.restore();
+      context.fillRect(0, i * dh + 50, width, dh);
     }
+
+    for (let i = 0; i < Math.ceil((height - 50) / dh); i++) {
+      context.fillStyle = i % 2 === 0 ? "rgb(15,15,15)" : "rgb(20,20,20";
+      context.fillRect(0, i * dh + 50, width, dh);
+    }
+
     for (let i = 1; i < Math.ceil(width / dw); i++) {
       context.save();
       context.strokeStyle =
         i % 4 === 0 ? "rgba(255,255,255,.6)" : "rgba(255,255,255,.2)";
       context.beginPath();
-      context.moveTo(i * dw, 0);
+      context.moveTo(i * dw, 50);
       context.lineTo(i * dw + 1, height);
       context.stroke();
       context.restore();
@@ -75,6 +78,36 @@ const PianoRoll = () => {
     context.fill();
   }
 
+  function drawPlayhead(cell: number) {
+    if (!canvasRef.current || !canvasContainer.current) return;
+    const ctx = canvasRef.current?.getContext("2d");
+    if (!ctx) return;
+
+    // Clear playhead top
+    ctx.fillStyle = "rgb(0,0,0)";
+    ctx.fillRect(0, 0, canvasRef.current.width, 50);
+
+    // Playhead body
+    ctx.fillStyle = "rgb(120,35,230)";
+    ctx.beginPath();
+    ctx.moveTo(cell * dw - 25, 0);
+    ctx.lineTo(cell * dw + 25, 0);
+    ctx.lineTo(cell * dw + 25, 25);
+    ctx.lineTo(cell * dw, 50);
+    ctx.lineTo(cell * dw - 25, 25);
+
+    ctx.closePath();
+    ctx.fill();
+
+    // Playhead line
+    ctx.strokeStyle = "rgb(120,35,230)";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(cell * dw, 0);
+    ctx.lineTo(cell * dw, canvasRef.current.height);
+    ctx.stroke();
+  }
+
   function handleCanvasClick(e: MouseEvent) {
     if (!canvasRef.current) return;
     const rect = canvasRef.current.getBoundingClientRect();
@@ -83,6 +116,11 @@ const PianoRoll = () => {
 
     const i = Math.floor(y / dh);
     const j = Math.floor(x / dw);
+
+    // TODO: Handle playhead
+    if (y <= 50) {
+      return;
+    }
 
     // Return if cell is already filled
     if (
@@ -122,25 +160,27 @@ const PianoRoll = () => {
       });
 
       setTiles(newTiles);
+
+      // Show cursor to ew-resize when close to right or left edge of cell
+      if (x % dw > dw - 10 || x % dw < 10) {
+        canvasRef.current.style.cursor = "ew-resize";
+      }
     } else {
       const newTiles = tilesRef.current.map(([cell_i, cell_j, s, h]) => {
         return [cell_i, cell_j, s, false];
       });
 
-      setTiles(newTiles);
-    }
-
-    // Show cursor to ew-resize when close to right or left edge of cell
-    if (x % dw > dw - 10 || x % dw < 10) {
-      canvasRef.current.style.cursor = "ew-resize";
-    } else {
       canvasRef.current.style.cursor = "default";
+
+      setTiles(newTiles);
     }
   }
 
   const animate = () => {
     // Redraw background
     drawBackgroundCells();
+
+    drawPlayhead(3);
 
     // Redraw tiles
     tilesRef.current.forEach(([x, y, s, h]) => drawCell(x, y, s, h));
