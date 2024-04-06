@@ -1,22 +1,16 @@
 import { useRef, useEffect, useState } from "react";
-import { create } from "zustand";
-
-type TTileStore = {
-  tiles: [number, number][];
-  addTile: (i: number, j: number) => void;
-};
-
-const tileStore = create<TTileStore>((set) => ({
-  tiles: [],
-  addTileToStore: (i: number, j: number) =>
-    set((state) => ({ tiles: [...state.tiles, [i, j]] })),
-}));
 
 const PianoRoll = () => {
   const canvasContainer = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const { tiles, addTileToStore } = tileStore();
+  const [tiles, _setTiles] = useState<[number, number][]>([]);
+  const tilesRef = useRef(tiles);
+
+  function setTiles(tiles: [number, number][]) {
+    tilesRef.current = tiles;
+    _setTiles(tiles);
+  }
 
   const dpr = window.devicePixelRatio || 1;
   const dh = 50;
@@ -32,10 +26,10 @@ const PianoRoll = () => {
     drawBackgroundCells();
 
     // Redraw tiles if there are any
-    console.log(tiles);
-    if (tiles) {
+    console.log(tilesRef.current);
+    if (tilesRef.current) {
       console.log("redrawing cells");
-      tiles.forEach(([i, j]) => drawCell(i, j));
+      tilesRef.current.forEach(([i, j]) => drawCell(i, j));
     }
   }
 
@@ -91,7 +85,7 @@ const PianoRoll = () => {
     const i = Math.floor(y / dh);
     const j = Math.floor(x / dw);
 
-    addTileToStore(i, j);
+    setTiles([...tilesRef.current, [i, j]]);
 
     drawCell(i, j);
   }
