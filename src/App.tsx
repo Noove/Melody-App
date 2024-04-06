@@ -8,7 +8,7 @@ function App() {
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <div className="flex h-screen w-full flex-col bg-black">
         {/* TOP CONTENT */}
-        <TopBar />
+        {/* <TopBar /> */}
 
         {/* MAIN CONTENT */}
         <div className="flex-1">

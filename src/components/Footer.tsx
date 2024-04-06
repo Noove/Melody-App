@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { Volume, Volume1, Volume2, Play, Square, Settings } from "lucide-react";
 import CircleButton from "./CircleButton";
+import usePlaybackState from "@/lib/state";
 
 const Footer = () => {
   const [volume, setVolume] = useState(75);
   const [isPlaying, setIsPlaying] = useState(false);
   const [bpm, setBpm] = useState(120);
+
+  const { humanTime } = usePlaybackState();
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -41,7 +44,7 @@ const Footer = () => {
         </div>
 
         <span className="mb-1 mr-5 flex justify-self-center text-2xl">
-          00:00.00
+          {humanTime}
         </span>
 
         <CircleButton
@@ -66,7 +69,7 @@ const Footer = () => {
           icon={<Settings color="#fff" />}
         />
 
-        <button className="text-l bg-highlight mb-1 flex h-12 items-center justify-center rounded-md px-4">
+        <button className="text-l mb-1 flex h-12 items-center justify-center rounded-md bg-highlight px-4">
           {(window as any).chrome ? "Send to device" : "Save to file"}
         </button>
       </footer>

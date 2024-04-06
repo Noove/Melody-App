@@ -11,9 +11,4 @@
     font-style: normal;
     color: #fff;
   }
-
-  html,
-  body {
-    @apply overflow-hidden;
-  }
 }
