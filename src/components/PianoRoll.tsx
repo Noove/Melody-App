@@ -4,10 +4,11 @@ const PianoRoll = () => {
   const canvasContainer = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const [tiles, _setTiles] = useState<[number, number][]>([]);
+  // Tiles are stored as x, y, size, highlight
+  const [tiles, _setTiles] = useState<[number, number, number, boolean][]>([]);
   const tilesRef = useRef(tiles);
 
-  function setTiles(tiles: [number, number][]) {
+  function setTiles(tiles: [number, number, number, boolean][]) {
     tilesRef.current = tiles;
     _setTiles(tiles);
   }
@@ -24,13 +25,6 @@ const PianoRoll = () => {
 
     // Redraw background
     drawBackgroundCells();
-
-    // Redraw tiles if there are any
-    console.log(tilesRef.current);
-    if (tilesRef.current) {
-      console.log("redrawing cells");
-      tilesRef.current.forEach(([i, j]) => drawCell(i, j));
-    }
   }
 
   function drawBackgroundCells() {
@@ -60,18 +54,23 @@ const PianoRoll = () => {
     }
   }
 
-  function drawCell(i: number, j: number) {
+  function drawCell(x: number, y: number, s: number, h: boolean) {
     if (!canvasRef.current || !canvasContainer.current) return;
     const context = canvasRef.current?.getContext("2d");
     if (!context) return;
 
     const cellRounding = [10, 10, 10, 10];
 
-    context.strokeStyle = "rgb(120,35,230)";
-    context.fillStyle = "rgba(120,35,230)";
+    if (h) {
+      context.strokeStyle = "rgba(120,35,230,0.8)";
+      context.fillStyle = "rgba(120,35,230,0.8)";
+    } else {
+      context.strokeStyle = "rgba(120,35,230,0.5)";
+      context.fillStyle = "rgba(120,35,230,0.5)";
+    }
 
     context.beginPath();
-    context.roundRect(j * dw, i * dh, dw, dh, cellRounding);
+    context.roundRect(y * dw, x * dh, dw * s, dh, cellRounding);
     context.stroke();
     context.fill();
   }
@@ -85,20 +84,84 @@ const PianoRoll = () => {
     const i = Math.floor(y / dh);
     const j = Math.floor(x / dw);
 
-    setTiles([...tilesRef.current, [i, j]]);
+    // Return if cell is already filled
+    if (
+      tilesRef.current.find(([cell_i, cell_j]) => {
+        return cell_i === i && cell_j === j;
+      })
+    ) {
+      return;
+    }
 
-    drawCell(i, j);
+    setTiles([...tilesRef.current, [i, j, 1, false]]);
   }
+
+  function handleCanvasMouse(e: MouseEvent) {
+    if (!canvasRef.current) return;
+
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * dpr;
+    const y = (e.clientY - rect.top) * dpr;
+
+    const i = Math.floor(y / dh);
+    const j = Math.floor(x / dw);
+
+    // Check if any tile is hovered over
+    const tile = tilesRef.current.find(([cell_i, cell_j]) => {
+      return cell_i === i && cell_j === j;
+    });
+
+    if (tile) {
+      // Highlight hovered tile
+      const newTiles = tilesRef.current.map(([cell_i, cell_j, s, h]) => {
+        if (cell_i === i && cell_j === j) {
+          return [cell_i, cell_j, s, true];
+        } else {
+          return [cell_i, cell_j, s, false];
+        }
+      });
+
+      setTiles(newTiles);
+    } else {
+      const newTiles = tilesRef.current.map(([cell_i, cell_j, s, h]) => {
+        return [cell_i, cell_j, s, false];
+      });
+
+      setTiles(newTiles);
+    }
+
+    // Show cursor to ew-resize when close to right or left edge of cell
+    if (x % dw > dw - 10 || x % dw < 10) {
+      canvasRef.current.style.cursor = "ew-resize";
+    } else {
+      canvasRef.current.style.cursor = "default";
+    }
+  }
+
+  const animate = () => {
+    // Redraw background
+    drawBackgroundCells();
+
+    // Redraw tiles
+    tilesRef.current.forEach(([x, y, s, h]) => drawCell(x, y, s, h));
+
+    // Request next frame
+    requestAnimationFrame(animate);
+  };
 
   useEffect(() => {
     resizeCanvas();
 
     canvasRef.current?.addEventListener("click", handleCanvasClick);
+    canvasRef.current?.addEventListener("mousemove", handleCanvasMouse);
     window.addEventListener("resize", resizeCanvas);
+
+    requestAnimationFrame(animate);
 
     return () => {
       window.removeEventListener("resize", resizeCanvas);
       canvasRef.current?.removeEventListener("click", handleCanvasClick);
+      canvasRef.current?.removeEventListener("mousemove", handleCanvasMouse);
     };
   }, []);
 
