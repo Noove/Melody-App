@@ -50,6 +50,7 @@ class PianoRollController {
   private playing = false;
   private playStart = 0;
   private bpm = 120;
+  private _prevPlayheadPosition = 0;
   private _playheadPosition = 0;
 
   public notes: Note[] = [];
@@ -75,6 +76,7 @@ class PianoRollController {
     window.addEventListener("mousedown", this.handleMouseDown.bind(this));
     window.addEventListener("mouseup", this.handleMouseUp.bind(this));
     window.addEventListener("wheel", this.handleMouseWheel.bind(this));
+    window.addEventListener("keydown", this.handleKeyDown.bind(this));
 
     Tone.start();
   }
@@ -250,6 +252,12 @@ class PianoRollController {
     if (e.clientY * window.devicePixelRatio <= 50) {
       this._playheadPosition =
         (e.clientX * window.devicePixelRatio) / this._cellWidth;
+
+      this._prevPlayheadPosition = this._playheadPosition;
+
+      if (this.playing) {
+        this.playing = false;
+      }
     }
     // Place a note if the cursor is in the grid
     else {
@@ -355,6 +363,13 @@ class PianoRollController {
     }
   }
 
+  private handleKeyDown(e: KeyboardEvent) {
+    console.log(e.code);
+    if (e.code === "KeyR") {
+      this.resetPlayback();
+    }
+  }
+
   private beatsToTime(beats: number, bpm: number) {
     var beatDuration = 60000 / bpm;
 
@@ -395,8 +410,17 @@ class PianoRollController {
       this.playStart = Tone.now() * 1000;
     } else {
       this.playing = false;
+      this._prevPlayheadPosition = this._playheadPosition;
       this.playStart = 0;
     }
+  }
+
+  public resetPlayback() {
+    this.playing = false;
+    this._playheadPosition = 0;
+    this._prevPlayheadPosition = 0;
+    this.playStart = 0;
+    usePlaybackState.setState({ humanTime: "00:00.00" });
   }
 
   public setBPM(bpm: number) {
@@ -416,10 +440,10 @@ class PianoRollController {
         (Tone.now() * 1000 - this.playStart) / (60000 / this.bpm);
 
       // Calculate the playhead position
-      this._playheadPosition = beatsPassed;
+      this._playheadPosition = this._prevPlayheadPosition + beatsPassed;
 
       // Calculate the time passed
-      const timePassed = this.beatsToTime(beatsPassed, this.bpm);
+      const timePassed = this.beatsToTime(this._playheadPosition, this.bpm);
       usePlaybackState.setState({ humanTime: timePassed });
     }
 
