@@ -5,8 +5,10 @@ class Note {
   private _cellHeight: number;
   private _headerHeight: number;
 
-  public _positionX: number;
-  public _positionY: number;
+  private _positionX: number;
+  private _positionY: number;
+
+  public _size: number = 1;
 
   constructor(
     ctx: CanvasRenderingContext2D,
@@ -24,16 +26,35 @@ class Note {
     this._headerHeight = headerHeight;
   }
 
-  // Node is draggable if the mouse is within 10px of either left or right edge
-  public checkIsDraggable(x: number, y: number) {
-    if (
-      x % this._cellWidth < 10 ||
-      x % this._cellWidth > this._cellWidth - 10
-    ) {
-      return true;
-    }
+  public getDraggableSide(x: number, y: number) {
+    const cursorX = x * window.devicePixelRatio;
+    const cursorY =
+      Math.floor(
+        (y * window.devicePixelRatio - this._headerHeight) / this._cellHeight,
+      ) *
+        this._cellHeight +
+      this._headerHeight;
 
-    return false;
+    if (
+      cursorY >= this._positionY * this._cellHeight &&
+      cursorY <= (this._positionY + 1) * this._cellHeight
+    ) {
+      if (
+        cursorX >= this._positionX * this._cellWidth - 10 &&
+        cursorX <= this._positionX * this._cellWidth + 10
+      ) {
+        console.log("cursor is near left side!");
+        return "right";
+      }
+
+      if (
+        cursorX >= (this._positionX + 1) * this._cellWidth - 10 &&
+        cursorX <= (this._positionX + 1) * this._cellWidth + 10
+      ) {
+        console.log("cursor is near right side!");
+        return "left";
+      }
+    }
   }
 
   public draw() {
@@ -43,7 +64,7 @@ class Note {
     this._ctx.beginPath();
     this._ctx.roundRect(
       this._positionX * this._cellWidth,
-      this._positionY * this._cellHeight,
+      this._positionY * this._cellHeight + this._headerHeight,
       this._cellWidth,
       this._cellHeight,
       10,

@@ -5,27 +5,21 @@ const PianoRoll = () => {
   const [controller, setController] = useState<PianoRollController | null>(
     null,
   );
-  const canvasContainer = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (canvasRef.current && canvasContainer.current && !controller) {
-      const controller = new PianoRollController(
-        canvasRef.current,
-        canvasContainer.current,
-      );
+    if (canvasRef.current && !controller) {
+      const controller = new PianoRollController(canvasRef.current);
       setController(controller);
 
-      requestAnimationFrame(() => {
-        controller.draw();
-      });
+      controller.draw();
     }
   }, []);
 
   return (
-    <div ref={canvasContainer} className="h-full w-full flex-1">
-      <canvas className="h-full w-full" ref={canvasRef}></canvas>
-    </div>
+    // <div ref={canvasContainer} className="h-full w-full flex-1">
+    <canvas className="h-full w-full flex-1" ref={canvasRef}></canvas>
+    // </div>
   );
 };
 
