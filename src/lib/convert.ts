@@ -20,7 +20,6 @@ export function createHeaderFile(array: Uint8Array) {
   #else
   #include "WProgram.h"
   #endif
-  #include "mozzi_pgmspace.h"
   #define AUDIO_NUM_CELLS ${array.length}
   #define AUDIO_SAMPLERATE ${SAMPLE_RATE}
   CONSTTABLE_STORAGE(uint8_t) AUDIO_DATA [] = {
