@@ -69,6 +69,15 @@ class Note {
     );
     this._ctx.fill();
   }
+
+  public intersects(other: Note) {
+    return (
+      this._positionX < other._positionX + other._size &&
+      this._positionX + this._size > other._positionX &&
+      this._positionY < other._positionY + 1 &&
+      this._positionY + 1 > other._positionY
+    );
+  }
 }
 
 export default Note;

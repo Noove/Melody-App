@@ -12,7 +12,7 @@ class PianoRollController {
   private _cellHeightCount = 35;
   private _cellWidthCount = 16;
 
-  private notes: Note[] = [];
+  public notes: Note[] = [];
 
   private canDrag: Note | null = null;
   private isDragging = false;
@@ -102,6 +102,16 @@ class PianoRollController {
         this._cellHeight,
         this._headerHeight,
       );
+
+      // check if intersects with other notes
+      const intersectsWith = this.notes.findIndex((n) => n.intersects(note));
+
+      if (intersectsWith !== -1) {
+        //delete note
+        this.notes.splice(intersectsWith, 1);
+        return;
+      }
+
       note.draw();
       this.notes.push(note);
     }

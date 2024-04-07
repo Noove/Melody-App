@@ -10,6 +10,7 @@ const PianoRoll = () => {
   useEffect(() => {
     if (canvasRef.current && !controller) {
       const controller = new PianoRollController(canvasRef.current);
+      (window as any).controller = controller;
       setController(controller);
 
       controller.draw();
