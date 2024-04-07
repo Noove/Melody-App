@@ -42,7 +42,7 @@ class PianoRollController {
   private _cellWidth: number;
   private _cellHeight: number;
 
-  private _cellHeightCount = 35;
+  private _cellHeightCount = 36;
   private _cellWidthCount = 16;
 
   private _cellOffsetY = 0;
