@@ -2,41 +2,37 @@ import usePlaybackState from "../state.ts";
 import Note from "./note.ts";
 import * as Tone from "tone";
 
-
 function parseLetterNotes(notes: string) {
-  const octaves = Array(7).fill('');
+  const octaves = Array(7).fill("");
 
-  const lines = notes.trim().split('\n');
+  const lines = notes.trim().split("\n");
 
-  const batch = Array(7).fill('');
+  const batch = Array(7).fill("");
   let max = 0;
 
-  for(const line of lines) {
-      let [octave, data] = line.split('|');
+  for (const line of lines) {
+    let [octave, data] = line.split("|");
 
-      if(octave.startsWith('RH') || octave.startsWith('LH')) {
-          octave = octave.split(':')[1];
-      }
+    if (octave.startsWith("RH") || octave.startsWith("LH")) {
+      octave = octave.split(":")[1];
+    }
 
+    if (isNaN(parseInt(octave))) {
+      batch.forEach((data, index) => {
+        octaves[index] += data.padEnd(max, "-");
+      });
 
-      if(isNaN(parseInt(octave))) {
-          batch.forEach((data, index) => {
-              octaves[index] += data.padEnd(max, '-');
-          });
+      batch.fill("");
+      max = 0;
+      continue;
+    }
 
-          batch.fill('');
-          max = 0;
-          continue;
-      }
-
-      batch[parseInt(octave) - 1] = data;
-      max = Math.max(max, data.length);
+    batch[parseInt(octave) - 1] = data;
+    max = Math.max(max, data.length);
   }
-
 
   return octaves;
 }
-
 
 class PianoRollController {
   private _canvas: HTMLCanvasElement;
@@ -76,53 +72,63 @@ class PianoRollController {
     window.addEventListener("mousemove", this.handleCursorMove.bind(this));
     window.addEventListener("mousedown", this.handleMouseDown.bind(this));
     window.addEventListener("mouseup", this.handleMouseUp.bind(this));
+    window.addEventListener("wheel", this.handleMouseWheel.bind(this));
   }
 
-  
+  private handleMouseWheel(e: WheelEvent) {
+    if (e.deltaY < 0) {
+      this._cellWidthCount = this._cellWidthCount + 1;
+    } else {
+      this._cellWidthCount = Math.max(16, this._cellWidthCount - 1);
+    }
+
+    this._cellWidth = this._canvas.width / this._cellWidthCount;
+
+    this.notes.forEach((note) =>
+      note.updateSize(this._cellWidth, this._cellHeight),
+    );
+  }
 
   public importLetterNotes(notes: string) {
     const octaves = parseLetterNotes(notes);
-  
-    const length = Math.max(...octaves.map(octave => octave.length));
-  
-  
-    
+
+    const length = Math.max(...octaves.map((octave) => octave.length));
+
     for (let i = 0; i < length; i++) {
-        octaves.forEach((octave, index) => {
-            const note = octave[i];
-            if(!note || note === '-') return;
-  
-            const toneNote = note.toUpperCase() + (note === note.toUpperCase() ? '#' : '') + (index + 1);
-              
-            const noteX =
-            i *
-            this._cellWidth;
-          const noteY =
-            Note.fromName(toneNote)! *
-              this._cellHeight +
-            this._headerHeight;
-    
-          const note2 = new Note(
-            this._ctx,
-            noteX / this._cellWidth,
-            Math.round((noteY - this._headerHeight) / this._cellHeight),
-            this._cellWidth,
-            this._cellHeight,
-            this._headerHeight,
-          );
-    
-          // check if intersects with other notes
-          const intersectsWith = this.notes.findIndex((n) => n.intersects(note2));
-    
-          if (intersectsWith !== -1) {
-            //delete note
-            this.notes.splice(intersectsWith, 1);
-            return;
-          }
-    
-          note2.draw();
-          this.notes.push(note2);
-        });
+      octaves.forEach((octave, index) => {
+        const note = octave[i];
+        if (!note || note === "-") return;
+
+        const toneNote =
+          note.toUpperCase() +
+          (note === note.toUpperCase() ? "#" : "") +
+          (index + 1);
+
+        const noteX = i * this._cellWidth;
+        const noteY =
+          Note.fromName(toneNote)! * this._cellHeight + this._headerHeight;
+
+        const note2 = new Note(
+          this._ctx,
+          noteX / this._cellWidth,
+          Math.round((noteY - this._headerHeight) / this._cellHeight),
+          this._cellWidth,
+          this._cellHeight,
+          this._headerHeight,
+        );
+
+        // check if intersects with other notes
+        const intersectsWith = this.notes.findIndex((n) => n.intersects(note2));
+
+        if (intersectsWith !== -1) {
+          //delete note
+          this.notes.splice(intersectsWith, 1);
+          return;
+        }
+
+        note2.draw();
+        this.notes.push(note2);
+      });
     }
   }
 
@@ -368,7 +374,6 @@ class PianoRollController {
   }
 
   public draw() {
-
     this.drawGrid();
 
     this.notes.forEach((note) => {
@@ -377,7 +382,8 @@ class PianoRollController {
 
     if (this.playing) {
       // Calculate total beats passed
-      const beatsPassed = (Tone.now() * 1000 - this.playStart) / (60000 / this.bpm);
+      const beatsPassed =
+        (Tone.now() * 1000 - this.playStart) / (60000 / this.bpm);
 
       if (beatsPassed >= this._cellWidthCount) {
         this.playStart = Tone.now() * 1000;
