@@ -10,6 +10,8 @@ class Note {
   public _positionX: number;
   public _positionY: number;
 
+  public _offsetY: number = 0;
+
   public _size: number = 1;
 
   constructor(
@@ -239,7 +241,7 @@ class Note {
     this._ctx.beginPath();
     this._ctx.roundRect(
       this._positionX * this._cellWidth,
-      this._positionY * this._cellHeight + this._headerHeight,
+      (this._positionY + this._offsetY) * this._cellHeight + this._headerHeight,
       this._cellWidth * this._size,
       this._cellHeight,
       10,

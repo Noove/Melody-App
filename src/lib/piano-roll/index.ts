@@ -45,6 +45,8 @@ class PianoRollController {
   private _cellHeightCount = 35;
   private _cellWidthCount = 16;
 
+  private _cellOffsetY = 0;
+
   private playing = false;
   private playStart = 0;
   private bpm = 120;
@@ -76,17 +78,27 @@ class PianoRollController {
   }
 
   private handleMouseWheel(e: WheelEvent) {
-    if (e.deltaY < 0) {
-      this._cellWidthCount = this._cellWidthCount + 1;
+    if (e.ctrlKey) {
+      if (e.deltaY < 0) {
+        this._cellOffsetY += 1;
+      } else {
+        this._cellOffsetY -= 1;
+      }
+
+      this.notes.forEach((note) => (note._offsetY = this._cellOffsetY));
     } else {
-      this._cellWidthCount = Math.max(16, this._cellWidthCount - 1);
+      if (e.deltaY < 0) {
+        this._cellWidthCount = this._cellWidthCount + 1;
+      } else {
+        this._cellWidthCount = Math.max(16, this._cellWidthCount - 1);
+      }
+
+      this._cellWidth = this._canvas.width / this._cellWidthCount;
+
+      this.notes.forEach((note) =>
+        note.updateSize(this._cellWidth, this._cellHeight),
+      );
     }
-
-    this._cellWidth = this._canvas.width / this._cellWidthCount;
-
-    this.notes.forEach((note) =>
-      note.updateSize(this._cellWidth, this._cellHeight),
-    );
   }
 
   public importLetterNotes(notes: string) {
