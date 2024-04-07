@@ -17,11 +17,7 @@ const PianoRoll = () => {
     }
   }, []);
 
-  return (
-    // <div ref={canvasContainer} className="h-full w-full flex-1">
-    <canvas className="h-full w-full flex-1" ref={canvasRef}></canvas>
-    // </div>
-  );
+  return <canvas className="h-full w-full flex-1" ref={canvasRef}></canvas>;
 };
 
 export default PianoRoll;

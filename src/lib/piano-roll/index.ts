@@ -1,16 +1,21 @@
+import usePlaybackState from "../state.ts";
 import Note from "./note.ts";
 
 class PianoRollController {
   private _canvas: HTMLCanvasElement;
   private _ctx: CanvasRenderingContext2D;
 
-  // Header height in pixels
   private _headerHeight: number = 50;
   private _cellWidth: number;
   private _cellHeight: number;
 
   private _cellHeightCount = 35;
   private _cellWidthCount = 16;
+
+  private playing = false;
+  private playStart = 0;
+  private bpm = 120;
+  private _playheadPosition = 0;
 
   public notes: Note[] = [];
 
@@ -71,6 +76,51 @@ class PianoRollController {
     this._ctx.fillText(this.isDragging + "", 50, 50);
   }
 
+  // Draw the playhead
+  private drawPlayhead() {
+    // Clear playhead top
+    this._ctx.fillStyle = "rgb(0,0,0)";
+    this._ctx.fillRect(0, 0, this._canvas.width, 50);
+
+    // Playhead body
+    this._ctx.fillStyle = "rgb(120,35,230)";
+    this._ctx.beginPath();
+    this._ctx.moveTo(
+      this._playheadPosition * this._cellWidth - this._headerHeight / 2,
+      0,
+    );
+    this._ctx.lineTo(
+      this._playheadPosition * this._cellWidth + this._headerHeight / 2,
+      0,
+    );
+    this._ctx.lineTo(
+      this._playheadPosition * this._cellWidth + this._headerHeight / 2,
+      25,
+    );
+    this._ctx.lineTo(
+      this._playheadPosition * this._cellWidth,
+      this._cellHeight,
+    );
+    this._ctx.lineTo(
+      this._playheadPosition * this._cellWidth - this._headerHeight / 2,
+      this._headerHeight / 2,
+    );
+
+    this._ctx.closePath();
+    this._ctx.fill();
+
+    // Playhead line
+    this._ctx.strokeStyle = "rgb(120,35,230)";
+    this._ctx.lineWidth = 4;
+    this._ctx.beginPath();
+    this._ctx.moveTo(this._playheadPosition * this._cellWidth, 0);
+    this._ctx.lineTo(
+      this._playheadPosition * this._cellWidth,
+      this._canvas.height,
+    );
+    this._ctx.stroke();
+  }
+
   // Draw a note
   private handleMouseDown(e: MouseEvent) {
     if (this.canDrag !== null) {
@@ -80,6 +130,8 @@ class PianoRollController {
 
     // Seek if the cursor is in the header
     if (e.clientY * window.devicePixelRatio <= 50) {
+      this._playheadPosition =
+        (e.clientX * window.devicePixelRatio) / this._cellWidth;
     }
     // Place a note if the cursor is in the grid
     else {
@@ -182,6 +234,29 @@ class PianoRollController {
     }
   }
 
+  private beatsToTime(beats: number, bpm: number) {
+    var beatDuration = 60000 / bpm;
+
+    var durationInMillis = beats * beatDuration;
+
+    var minutes = Math.floor(durationInMillis / 60000);
+    var seconds = Math.floor((durationInMillis % 60000) / 1000);
+    var milliseconds = Math.floor((durationInMillis % 1000) / 10);
+
+    var timeString =
+      (minutes < 10 ? "0" : "") +
+      minutes +
+      ":" +
+      (seconds < 10 ? "0" : "") +
+      seconds +
+      "." +
+      (milliseconds < 10 ? "0" : "") +
+      (milliseconds < 1 ? "0" : "") +
+      milliseconds;
+
+    return timeString;
+  }
+
   public resize() {
     this._canvas.width = this._canvas.clientWidth * window.devicePixelRatio;
     this._canvas.height = this._canvas.clientHeight * window.devicePixelRatio;
@@ -193,13 +268,40 @@ class PianoRollController {
     this.draw();
   }
 
+  public togglePlay() {
+    if (!this.playing) {
+      this.playing = true;
+      this.playStart = Date.now();
+    } else {
+      this.playing = false;
+      this.playStart = 0;
+    }
+  }
+
   public draw() {
     this.drawGrid();
 
-    // Draw notes
     this.notes.forEach((note) => {
       note.draw();
     });
+
+    if (this.playing) {
+      // Calculate total beats passed
+      const beatsPassed = (Date.now() - this.playStart) / (60000 / this.bpm);
+
+      if (beatsPassed >= this._cellWidthCount) {
+        this.playStart = Date.now();
+      }
+
+      // Calculate the playhead position
+      this._playheadPosition = beatsPassed % this._cellWidthCount;
+
+      // Calculate the time passed
+      const timePassed = this.beatsToTime(beatsPassed, this.bpm);
+      usePlaybackState.setState({ humanTime: timePassed });
+    }
+
+    this.drawPlayhead();
 
     requestAnimationFrame(this.draw.bind(this));
   }
