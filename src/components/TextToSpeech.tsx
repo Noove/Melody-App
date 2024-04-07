@@ -1,27 +1,37 @@
+import { createHeaderFile, bufferToRaw, fileToBuffer, downloadString, downloadRaw } from "@/lib/convert";
 import { useState } from "react";
 
 const TextToSpeech = () => {
   const [text, setText] = useState("");
-  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  // const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [voice, setVoice] = useState(true);
 
-  function sendRequest(text: string, voice: boolean) {
+  function play(text: string, voice: boolean) {
     fetch(
       `https://martinusius.sk/tts.php?text=${text}&${voice ? "gender=male" : "gender=female"}`,
     )
       .then((response) => response.blob())
-      .then((blob) => {
+      .then(async (blob) => {
         const audio = new Audio(URL.createObjectURL(blob));
-        setAudio(audio);
+
+        // setAudio(audio);
         audio.play();
       });
   }
 
-  function uploadToDevice(audio: HTMLAudioElement | null) {
-    // TO DO: Implement upload to device
-    if (audio) {
-      console.log("Uploading audio to device...");
-    }
+  function saveToFile(text: string, voice: boolean) {
+    fetch(
+      `https://martinusius.sk/tts.php?text=${text}&${voice ? "gender=male" : "gender=female"}`,
+    )
+      .then((response) => response.blob())
+      .then(async (blob) => {
+        const buffer = await fileToBuffer(blob);
+        const raw = bufferToRaw(buffer);
+        const voiceHeader = createHeaderFile(raw);
+
+        downloadRaw(raw, 'voice.raw');
+        downloadString(voiceHeader, 'voice.h');
+      });
   }
   return (
     <div className="flex h-full w-full flex-col items-center justify-center p-20">
@@ -52,15 +62,15 @@ const TextToSpeech = () => {
         <div className="ml-auto">
           <button
             className="bg-highlight mr-4 self-end rounded-lg p-2"
-            onClick={() => sendRequest(text, voice)}
+            onClick={() => play(text, voice)}
           >
             Generate Voice
           </button>
           <button
             className="self-end rounded-lg bg-white/5 p-2"
-            onClick={() => uploadToDevice(audio)}
+            onClick={() => saveToFile(text, voice)}
           >
-            Upload to device
+            Save to file
           </button>
         </div>
       </div>
