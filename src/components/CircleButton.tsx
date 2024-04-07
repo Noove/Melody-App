@@ -9,7 +9,7 @@ const CircleButton = ({
 }) => {
   return (
     <button
-      className={`flex h-12 w-12 items-center justify-center rounded-full bg-white/5 ${className}`}
+      className={`flex aspect-square size-12 items-center justify-center rounded-full bg-white/5  ${className}`}
       onClick={onClick}
     >
       {icon}
