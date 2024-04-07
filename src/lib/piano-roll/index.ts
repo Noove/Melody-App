@@ -179,7 +179,7 @@ class PianoRollController {
       this._ctx.fillText(
         noteKinds[i - this._cellOffsetY],
         10,
-        i * this._cellHeight + 40 + this._headerHeight,
+        i * this._cellHeight + this._headerHeight + this._cellHeight * 0.7,
       );
     }
   }
