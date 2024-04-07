@@ -5,8 +5,8 @@ class Note {
   private _cellHeight: number;
   private _headerHeight: number;
 
-  private _positionX: number;
-  private _positionY: number;
+  public _positionX: number;
+  public _positionY: number;
 
   public _size: number = 1;
 
@@ -43,16 +43,16 @@ class Note {
         cursorX >= this._positionX * this._cellWidth - 10 &&
         cursorX <= this._positionX * this._cellWidth + 10
       ) {
-        console.log("cursor is near left side!");
-        return "right";
+        // console.log("cursor is near left side!");
+        return "left";
       }
 
       if (
         cursorX >= (this._positionX + 1) * this._cellWidth - 10 &&
         cursorX <= (this._positionX + 1) * this._cellWidth + 10
       ) {
-        console.log("cursor is near right side!");
-        return "left";
+        // console.log("cursor is near right side!");
+        return "right";
       }
     }
   }
@@ -65,7 +65,7 @@ class Note {
     this._ctx.roundRect(
       this._positionX * this._cellWidth,
       this._positionY * this._cellHeight + this._headerHeight,
-      this._cellWidth,
+      this._cellWidth * this._size,
       this._cellHeight,
       10,
     );

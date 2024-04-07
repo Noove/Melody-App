@@ -14,10 +14,9 @@ class PianoRollController {
 
   private notes: Note[] = [];
 
-  private canDrag = false;
+  private canDrag: Note | null = null;
   private isDragging = false;
-  private draggedNote: Note | null = null;
-  private dragPoint: "left" | "right" | null = null;
+  private dragPoint: "left" | "right" | "center" | null = null;
 
   constructor(canvas: HTMLCanvasElement) {
     this._canvas = canvas;
@@ -34,6 +33,7 @@ class PianoRollController {
     window.addEventListener("resize", this.resize.bind(this));
     window.addEventListener("mousemove", this.handleCursorMove.bind(this));
     window.addEventListener("mousedown", this.handleMouseDown.bind(this));
+    window.addEventListener("mouseup", this.handleMouseUp.bind(this));
   }
 
   // Draw the background grid together with the header background
@@ -64,10 +64,20 @@ class PianoRollController {
       this._ctx.lineTo(i * this._cellWidth, this._canvas.height);
       this._ctx.stroke();
     }
+
+    // DEBUG TEXT
+    this._ctx.font = "48px serif";
+    this._ctx.fillStyle = "#ffffff";
+    this._ctx.fillText(this.isDragging + "", 50, 50);
   }
 
   // Draw a note
   private handleMouseDown(e: MouseEvent) {
+    if (this.canDrag !== null) {
+      this.isDragging = true;
+      return;
+    }
+
     // Seek if the cursor is in the header
     if (e.clientY * window.devicePixelRatio <= 50) {
     }
@@ -83,7 +93,6 @@ class PianoRollController {
         ) *
           this._cellHeight +
         this._headerHeight;
-
       const note = new Note(
         this._ctx,
         noteX / this._cellWidth,
@@ -92,10 +101,18 @@ class PianoRollController {
         this._cellHeight,
         this._headerHeight,
       );
-
       note.draw();
-
       this.notes.push(note);
+    }
+  }
+
+  private handleMouseUp() {
+    if (this.isDragging) {
+      this.isDragging = false;
+      this.canDrag = null;
+      this.dragPoint = null;
+
+      this._canvas.style.cursor = "default";
     }
   }
 
@@ -103,6 +120,24 @@ class PianoRollController {
   private handleCursorMove(e: MouseEvent) {
     let hoveredNote = null;
     let hoveredSide = null;
+
+    if (this.isDragging) {
+      const newX =
+        Math.floor((e.clientX * window.devicePixelRatio) / this._cellWidth) *
+        this._cellWidth;
+
+      console.log(this.dragPoint);
+      if (this.dragPoint === "right") {
+        this.canDrag!._size = Math.max(
+          newX / this._cellWidth - this.canDrag!._positionX,
+          1,
+        );
+      }
+
+      this.canDrag!.draw();
+
+      return;
+    }
 
     this.notes.forEach((note) => {
       if (note.getDraggableSide(e.clientX, e.clientY)) {
@@ -114,9 +149,9 @@ class PianoRollController {
     if (hoveredNote) {
       this._canvas.style.cursor = "ew-resize";
       this.dragPoint = hoveredSide;
-      this.canDrag = true;
+      this.canDrag = hoveredNote;
     } else {
-      this.canDrag = false;
+      this.canDrag = null;
       this.dragPoint = null;
       this._canvas.style.cursor = "default";
     }
