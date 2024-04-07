@@ -20,6 +20,7 @@
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",
     "tone": "^14.7.77",
+    "web-serial-polyfill": "^1.0.15",
     "zustand": "^4.5.2"
   },
   "devDependencies": {

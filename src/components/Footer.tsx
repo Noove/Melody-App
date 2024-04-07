@@ -12,129 +12,61 @@ const Footer = () => {
 
   const { humanTime } = usePlaybackState();
 
-  // function onPlay(playing: boolean) {
-  //   const oldSynths: Record<string, Tone.Synth> = (window as any).synths || {};
-  //   for (const key in oldSynths) {
-  //     oldSynths[key].dispose();
-  //   }
+  function onPlay(playing: boolean) {
+    const oldSynths: Record<string, Tone.Synth> = (window as any).synths || {};
+    for (const key in oldSynths) {
+      oldSynths[key].dispose();
+    }
 
-  //   if (!playing) return;
+    if(!playing) return;
 
-  //   const controller: PianoRollController = (window as any).controller;
 
-  //   // descending from B6
-  //   const noteScale = [
-  //     "B6",
-  //     "A#6",
-  //     "A6",
-  //     "G#6",
-  //     "G6",
-  //     "F#6",
-  //     "F6",
-  //     "E6",
-  //     "D#6",
-  //     "D6",
-  //     "C#6",
-  //     "C6",
-  //     "B5",
-  //     "A#5",
-  //     "A5",
-  //     "G#5",
-  //     "G5",
-  //     "F#5",
-  //     "F5",
-  //     "E5",
-  //     "D#5",
-  //     "D5",
-  //     "C#5",
-  //     "C5",
-  //     "B4",
-  //     "A#4",
-  //     "A4",
-  //     "G#4",
-  //     "G4",
-  //     "F#4",
-  //     "F4",
-  //     "E4",
-  //     "D#4",
-  //     "D4",
-  //     "C#4",
-  //     "C4",
-  //     "B3",
-  //     "A#3",
-  //     "A3",
-  //     "G#3",
-  //     "G3",
-  //     "F#3",
-  //     "F3",
-  //     "E3",
-  //     "D#3",
-  //     "D3",
-  //     "C#3",
-  //     "C3",
-  //     "B2",
-  //     "A#2",
-  //     "A2",
-  //     "G#2",
-  //     "G2",
-  //     "F#2",
-  //     "F2",
-  //     "E2",
-  //     "D#2",
-  //     "D2",
-  //     "C#2",
-  //     "C2",
-  //     "B1",
-  //     "A#1",
-  //     "A1",
-  //     "G#1",
-  //     "G1",
-  //     "F#1",
-  //     "F1",
-  //     "E1",
-  //     "D#1",
-  //     "D1",
-  //     "C#1",
-  //     "C1",
-  //     "B0",
-  //     "A#0",
-  //     "A0",
-  //     "G#0",
-  //     "G0",
-  //     "F#0",
-  //     "F0",
-  //     "E0",
-  //     "D#0",
-  //     "D0",
-  //     "C#0",
-  //     "C0",
-  //   ];
-  //   const synths: Record<string, Tone.Synth> = {};
+    const controller: PianoRollController = (window as any).controller;
 
-  //   const start = Tone.now();
-  //   const step = 60 / bpm;
+    // descending from B6
+    const noteScale = ['B6', 'A#6', 'A6', 'G#6', 'G6', 'F#6', 'F6', 'E6', 'D#6', 'D6', 'C#6', 'C6', 'B5', 'A#5', 'A5', 'G#5', 'G5', 'F#5', 'F5', 'E5', 'D#5', 'D5', 'C#5', 'C5', 'B4', 'A#4', 'A4', 'G#4', 'G4', 'F#4', 'F4', 'E4', 'D#4', 'D4', 'C#4', 'C4', 'B3', 'A#3', 'A3', 'G#3', 'G3', 'F#3', 'F3', 'E3', 'D#3', 'D3', 'C#3', 'C3', 'B2', 'A#2', 'A2', 'G#2', 'G2', 'F#2', 'F2', 'E2', 'D#2', 'D2', 'C#2', 'C2', 'B1', 'A#1', 'A1', 'G#1', 'G1', 'F#1', 'F1', 'E1', 'D#1', 'D1', 'C#1', 'C1', 'B0', 'A#0', 'A0', 'G#0', 'G0', 'F#0', 'F0', 'E0', 'D#0', 'D0', 'C#0', 'C0'];
+    const synths: Record<string, Tone.Synth> = {};
 
-  //   controller.notes.forEach((note) => {
-  //     const noteNote = noteScale[note._positionY];
-  //     if (!synths[noteNote]) {
-  //       synths[noteNote] = new Tone.Synth().toDestination();
-  //     }
+    const start = Tone.now();
+    const step = 60 / bpm;
 
-  //     synths[noteNote].triggerAttackRelease(
-  //       noteNote,
-  //       step * note._size,
-  //       start + step * note._positionX,
-  //     );
-  //   });
+    console.log(controller.notes);
 
-  //   (window as any).synths = synths;
-  // }
+    controller.notes.forEach((note) => {
+      const noteNote = noteScale[note._positionY];
+      if (!synths[noteNote]) {
+        synths[noteNote] = new Tone.Synth().toDestination();
+      }
+      console.log('note._positionX', note._positionX);
+      console.log(`triggerAttackRelease(${noteNote}, ${step * note._size}, ${start + step * note._positionX})`)
+      synths[noteNote].triggerAttackRelease(noteNote, step * note._size, start + step * note._positionX);
+    });
+
+    (window as any).synths = synths;
+  }
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.code === "Space") {
         setIsPlaying((prevState) => {
+          onPlay(!prevState);
+          return !prevState;
+        });
+        
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyPress);
+    return () => document.removeEventListener("keydown", handleKeyPress);
+  }, []);
+
+  
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.code === "Space") {
+        setIsPlaying((prevState) => {
           (window as any).controller.togglePlay();
+          onPlay(!prevState);
           return !prevState;
         });
       }
@@ -176,6 +108,7 @@ const Footer = () => {
           onClick={() => {
             setIsPlaying(!isPlaying);
             (window as any).controller.togglePlay();
+            onPlay(!isPlaying);
           }}
         />
 
@@ -198,7 +131,69 @@ const Footer = () => {
           icon={<Settings color="#fff" />}
         />
 
-        <button className="text-l mb-1 flex h-12 items-center justify-center rounded-md bg-highlight px-4">
+        <button className="text-l mb-1 flex h-12 items-center justify-center rounded-md bg-highlight px-4"
+          onClick={async () => {
+            const port = await (navigator as any).serial.requestPort();
+            await port.open({ baudRate: 115200 });
+            
+            // const decoder = new TextDecoderStream();
+
+            const sortedNotes: Note[] = (window as any).controller.notes.sort((a: any, b: any) => a._positionX - b._positionX);
+
+
+
+            
+
+            
+            // port.readable.pipeTo(decoder.writable);
+
+            // const reader = port.readable.getReader();
+            const writer =  (port.writable as WritableStream).getWriter();
+
+            
+            let start = performance.now();
+
+            function flush() {
+              const step = 60 / bpm;
+              const time = (start - performance.now()) / 1000;
+
+              const notesToPlay = [];
+
+              while(sortedNotes.length && sortedNotes[0]._positionX * step <= time) {
+                notesToPlay.push(sortedNotes.shift()!);
+              }
+
+              const array = new Uint16Array(notesToPlay.length * 2);
+
+              notesToPlay.forEach((note, i) => {
+                array[i * 2] = note.frequency;
+                array[i * 2 + 1] = note._size * step * 1000;
+              });
+
+              writer.write(array);
+            }
+
+            flush();
+            setInterval(flush, 100);
+
+            // let text = '';
+            
+            // while (true) {
+            //   console.log('aaa');
+            //   const { value, done } = await reader.read();
+            //   console.log('dddd');
+            //   if (value) {
+            //     // text += value + '\n';
+            //     console.log(value);
+            //   }
+            //   if (done) {
+            //     // console.log(text);
+            //     reader.releaseLock();
+            //     break;
+            //   }
+            // }
+          }}
+        >
           {(window as any).chrome ? "Send to device" : "Save to file"}
         </button>
       </footer>

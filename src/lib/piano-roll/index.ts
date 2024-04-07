@@ -1,5 +1,42 @@
 import usePlaybackState from "../state.ts";
 import Note from "./note.ts";
+import * as Tone from "tone";
+
+
+function parseLetterNotes(notes: string) {
+  const octaves = Array(7).fill('');
+
+  const lines = notes.trim().split('\n');
+
+  const batch = Array(7).fill('');
+  let max = 0;
+
+  for(const line of lines) {
+      let [octave, data] = line.split('|');
+
+      if(octave.startsWith('RH') || octave.startsWith('LH')) {
+          octave = octave.split(':')[1];
+      }
+
+
+      if(isNaN(parseInt(octave))) {
+          batch.forEach((data, index) => {
+              octaves[index] += data.padEnd(max, '-');
+          });
+
+          batch.fill('');
+          max = 0;
+          continue;
+      }
+
+      batch[parseInt(octave) - 1] = data;
+      max = Math.max(max, data.length);
+  }
+
+
+  return octaves;
+}
+
 
 class PianoRollController {
   private _canvas: HTMLCanvasElement;
@@ -39,6 +76,54 @@ class PianoRollController {
     window.addEventListener("mousemove", this.handleCursorMove.bind(this));
     window.addEventListener("mousedown", this.handleMouseDown.bind(this));
     window.addEventListener("mouseup", this.handleMouseUp.bind(this));
+  }
+
+  
+
+  public importLetterNotes(notes: string) {
+    const octaves = parseLetterNotes(notes);
+  
+    const length = Math.max(...octaves.map(octave => octave.length));
+  
+  
+    
+    for (let i = 0; i < length; i++) {
+        octaves.forEach((octave, index) => {
+            const note = octave[i];
+            if(!note || note === '-') return;
+  
+            const toneNote = note.toUpperCase() + (note === note.toUpperCase() ? '#' : '') + (index + 1);
+              
+            const noteX =
+            i *
+            this._cellWidth;
+          const noteY =
+            Note.fromName(toneNote)! *
+              this._cellHeight +
+            this._headerHeight;
+    
+          const note2 = new Note(
+            this._ctx,
+            noteX / this._cellWidth,
+            Math.round((noteY - this._headerHeight) / this._cellHeight),
+            this._cellWidth,
+            this._cellHeight,
+            this._headerHeight,
+          );
+    
+          // check if intersects with other notes
+          const intersectsWith = this.notes.findIndex((n) => n.intersects(note2));
+    
+          if (intersectsWith !== -1) {
+            //delete note
+            this.notes.splice(intersectsWith, 1);
+            return;
+          }
+    
+          note2.draw();
+          this.notes.push(note2);
+        });
+    }
   }
 
   // Draw the background grid together with the header background
@@ -271,7 +356,7 @@ class PianoRollController {
   public togglePlay() {
     if (!this.playing) {
       this.playing = true;
-      this.playStart = Date.now();
+      this.playStart = Tone.now() * 1000;
     } else {
       this.playing = false;
       this.playStart = 0;
@@ -283,6 +368,7 @@ class PianoRollController {
   }
 
   public draw() {
+
     this.drawGrid();
 
     this.notes.forEach((note) => {
@@ -291,10 +377,10 @@ class PianoRollController {
 
     if (this.playing) {
       // Calculate total beats passed
-      const beatsPassed = (Date.now() - this.playStart) / (60000 / this.bpm);
+      const beatsPassed = (Tone.now() * 1000 - this.playStart) / (60000 / this.bpm);
 
       if (beatsPassed >= this._cellWidthCount) {
-        this.playStart = Date.now();
+        this.playStart = Tone.now() * 1000;
       }
 
       // Calculate the playhead position
