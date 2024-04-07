@@ -11,9 +11,9 @@ function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <div className="flex h-screen w-full flex-col bg-black">
-        {selected == 1 ? (
+        {selected == "voice" ? (
           <TextToSpeech />
-        ) : selected == 2 ? (
+        ) : selected == "music" ? (
           <>
             <PianoRoll /> <Footer />
           </>
