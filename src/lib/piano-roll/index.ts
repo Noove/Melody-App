@@ -172,7 +172,7 @@ class PianoRollController {
 
   // Draw the note guide on the left side
   private drawNoteGuide() {
-    this._ctx.font = "32px new-science-extended";
+    this._ctx.font = `${this._cellHeight * 0.5}px new-science-extended`;
     this._ctx.fillStyle = "rgba(255,255,255,0.2)";
 
     for (let i = 0; i < this._cellHeightCount; i++) {
