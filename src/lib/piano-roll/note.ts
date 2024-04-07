@@ -43,7 +43,6 @@ class Note {
         cursorX >= this._positionX * this._cellWidth - 10 &&
         cursorX <= this._positionX * this._cellWidth + 10
       ) {
-        // console.log("cursor is near left side!");
         return "left";
       }
 
@@ -51,7 +50,6 @@ class Note {
         cursorX >= (this._positionX + this._size) * this._cellWidth - 10 &&
         cursorX <= (this._positionX + this._size) * this._cellWidth + 10
       ) {
-        // console.log("cursor is near right side!");
         return "right";
       }
     }

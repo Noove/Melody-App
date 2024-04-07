@@ -93,6 +93,7 @@ class PianoRollController {
         ) *
           this._cellHeight +
         this._headerHeight;
+
       const note = new Note(
         this._ctx,
         noteX / this._cellWidth,
@@ -122,16 +123,30 @@ class PianoRollController {
     let hoveredSide = null;
 
     if (this.isDragging) {
-      const newX =
+      const cursorSnappedX =
         Math.floor((e.clientX * window.devicePixelRatio) / this._cellWidth) *
         this._cellWidth;
 
-      console.log(this.dragPoint);
+      console.log(
+        cursorSnappedX,
+        cursorSnappedX / this._cellWidth - this.canDrag!._positionX,
+      );
       if (this.dragPoint === "right") {
         this.canDrag!._size = Math.max(
-          newX / this._cellWidth - this.canDrag!._positionX,
+          cursorSnappedX / this._cellWidth - this.canDrag!._positionX,
           1,
         );
+      }
+      if (this.dragPoint === "left") {
+        const newX = cursorSnappedX / this._cellWidth;
+
+        const newSize = Math.max(
+          1,
+          this.canDrag!._size + (this.canDrag!._positionX - newX),
+        );
+
+        this.canDrag!._positionX = newX;
+        this.canDrag!._size = newSize;
       }
 
       this.canDrag!.draw();
