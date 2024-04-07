@@ -32,7 +32,7 @@ const Footer = () => {
 
     console.log(controller.notes);
 
-    controller.notes.forEach((note) => {
+    controller.notes.sort((a, b) => a._positionX - b._positionX).forEach((note) => {
       const noteNote = noteScale[note._positionY];
       if (!synths[noteNote]) {
         synths[noteNote] = new Tone.Synth().toDestination();
