@@ -125,7 +125,8 @@ class PianoRollController {
         const note2 = new Note(
           this._ctx,
           noteX / this._cellWidth,
-          Math.round((noteY - this._headerHeight) / this._cellHeight) - this._cellOffsetY,
+          Math.round((noteY - this._headerHeight) / this._cellHeight) -
+            this._cellOffsetY,
           this._cellWidth,
           this._cellHeight,
           this._headerHeight,
@@ -266,14 +267,14 @@ class PianoRollController {
       const note = new Note(
         this._ctx,
         noteX / this._cellWidth,
-        Math.round((noteY - this._headerHeight) / this._cellHeight) - this._cellOffsetY,
+        Math.round((noteY - this._headerHeight) / this._cellHeight) -
+          this._cellOffsetY,
         this._cellWidth,
         this._cellHeight,
         this._headerHeight,
       );
 
       note._offsetY = this._cellOffsetY;
-
 
       // check if intersects with other notes
       const intersectsWith = this.notes.findIndex((n) => n.intersects(note));
