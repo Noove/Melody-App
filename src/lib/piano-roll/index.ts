@@ -75,6 +75,8 @@ class PianoRollController {
     window.addEventListener("mousedown", this.handleMouseDown.bind(this));
     window.addEventListener("mouseup", this.handleMouseUp.bind(this));
     window.addEventListener("wheel", this.handleMouseWheel.bind(this));
+
+    Tone.start();
   }
 
   private handleMouseWheel(e: WheelEvent) {
@@ -412,12 +414,8 @@ class PianoRollController {
       const beatsPassed =
         (Tone.now() * 1000 - this.playStart) / (60000 / this.bpm);
 
-      if (beatsPassed >= this._cellWidthCount) {
-        this.playStart = Tone.now() * 1000;
-      }
-
       // Calculate the playhead position
-      this._playheadPosition = beatsPassed % this._cellWidthCount;
+      this._playheadPosition = beatsPassed;
 
       // Calculate the time passed
       const timePassed = this.beatsToTime(beatsPassed, this.bpm);
