@@ -13,7 +13,7 @@ import { melodyToRaw, createHeaderFile, downloadString, DURATION_LIMIT, SAMPLE_R
 
 
 const Footer = () => {
-  const [volume, setVolume] = useState(75);
+  const [volume, setVolume] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [bpm, setBpm] = useState(120);
 
@@ -123,7 +123,7 @@ const Footer = () => {
 
     console.log(controller.notes);
 
-    const volumeNode = new Tone.Volume(volume/2).toDestination();
+    const volumeNode = new Tone.Volume(volume).toDestination();
     (window as any).volumeNode = volumeNode;
 
     controller.notes
@@ -166,22 +166,22 @@ const Footer = () => {
     <>
       <footer className="flex h-20 w-full items-center bg-white/10 px-10">
         <div className="mr-20 flex h-full items-center gap-x-4">
-          {volume > 50 ? (
-            <Volume2 color="#fff" />
-          ) : volume > 0 ? (
+          {volume < -30 ? (
+            <Volume color="#fff" />
+          ) : volume < -20 ? (
             <Volume1 color="#fff" />
           ) : (
-            <Volume color="#fff" />
+            <Volume2 color="#fff" />
           )}
 
           <input
             type="range"
-            min="0"
-            max="100"
+            min="-40"
+            max="0"
             value={volume}
             className="slider range cursor-pointer accent-white/5"
             onChange={(e) => {
-              (window as any).volumeNode?.volume?.rampTo(parseInt(e.target.value)/2, 0.1);
+              (window as any).volumeNode?.volume?.rampTo(parseInt(e.target.value), 0.1);
               setVolume(parseInt(e.target.value));
             }}
           />
@@ -215,8 +215,8 @@ const Footer = () => {
           <span className="text-white">BPM</span>
         </div>
 
-        <CircleButton
-          className="ml-auto mr-10"
+        <button
+          className="text-l mb-1 flex h-12 items-center justify-center rounded-md bg-highlight px-4 mx-4"
           onClick={() => {
             const controller: PianoRollController = (window as any).controller;
             const step = 60 / bpm;
@@ -254,11 +254,12 @@ const Footer = () => {
                 downloadString(createHeaderFile(raw), 'audio.h');
             });
           }}
-          icon={<Settings color="#fff" />}
-        />
+        >
+          Save to file
+        </button>
 
         <button
-          className="text-l mb-1 flex h-12 items-center justify-center rounded-md bg-highlight px-4"
+          className="text-l mb-1 flex h-12 items-center justify-center rounded-md bg-highlight px-4  mx-4"
           onClick={async () => {
             const port = await (navigator as any).serial.requestPort();
             await port.open({ baudRate: 115200 });
