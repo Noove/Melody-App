@@ -13,14 +13,14 @@ const Menu = ({
           className="mr-20 flex cursor-pointer flex-col items-center gap-y-2 rounded-lg border-2 border-white p-24 hover:bg-white hover:bg-white/10"
           onClick={() => setSelected("voice")}
         >
-          <Music color="#fff" />
+          <MicVocal color="#fff" />
           Create Voice Project
         </div>
         <div
           className="flex cursor-pointer flex-col items-center gap-y-2 rounded-lg border-2 border-white p-24 hover:bg-white/10"
           onClick={() => setSelected("music")}
         >
-          <MicVocal color="#fff" />
+          <Music color="#fff" />
           Create Music Project
         </div>
       </div>
