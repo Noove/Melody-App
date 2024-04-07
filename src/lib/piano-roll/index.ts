@@ -45,7 +45,7 @@ class PianoRollController {
   private _cellHeightCount = 36;
   private _cellWidthCount = 16;
 
-  private _cellOffsetY = 0;
+  private _cellOffsetY = -24;
 
   private playing = false;
   private playStart = 0;
@@ -79,14 +79,11 @@ class PianoRollController {
 
   private handleMouseWheel(e: WheelEvent) {
     if (e.ctrlKey) {
-      // Offset is limited from 0 to 84
       if (e.deltaY < 0) {
         this._cellOffsetY = Math.min(0, this._cellOffsetY + 1);
       } else {
         this._cellOffsetY = Math.max(-48, this._cellOffsetY - 1);
       }
-
-      console.log(this._cellOffsetY);
 
       this.notes.forEach((note) => (note._offsetY = this._cellOffsetY));
     } else {
