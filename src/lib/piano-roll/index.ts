@@ -78,7 +78,7 @@ class PianoRollController {
   }
 
   private handleMouseWheel(e: WheelEvent) {
-    if (e.ctrlKey) {
+    if (e.altKey) {
       if (e.deltaY < 0) {
         this._cellOffsetY = Math.min(0, this._cellOffsetY + 1);
       } else {
@@ -123,11 +123,13 @@ class PianoRollController {
         const note2 = new Note(
           this._ctx,
           noteX / this._cellWidth,
-          Math.round((noteY - this._headerHeight) / this._cellHeight),
+          Math.round((noteY - this._headerHeight) / this._cellHeight) - this._cellOffsetY,
           this._cellWidth,
           this._cellHeight,
           this._headerHeight,
         );
+
+        note2._offsetY = this._cellOffsetY;
 
         // check if intersects with other notes
         const intersectsWith = this.notes.findIndex((n) => n.intersects(note2));
@@ -236,6 +238,11 @@ class PianoRollController {
       return;
     }
 
+    // Seek if the cursor is in the footer
+    if (e.clientY * window.devicePixelRatio >= this._canvas.height) {
+      return;
+    }
+
     // Seek if the cursor is in the header
     if (e.clientY * window.devicePixelRatio <= 50) {
       this._playheadPosition =
@@ -257,11 +264,14 @@ class PianoRollController {
       const note = new Note(
         this._ctx,
         noteX / this._cellWidth,
-        Math.round((noteY - this._headerHeight) / this._cellHeight),
+        Math.round((noteY - this._headerHeight) / this._cellHeight) - this._cellOffsetY,
         this._cellWidth,
         this._cellHeight,
         this._headerHeight,
       );
+
+      note._offsetY = this._cellOffsetY;
+
 
       // check if intersects with other notes
       const intersectsWith = this.notes.findIndex((n) => n.intersects(note));

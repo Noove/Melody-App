@@ -123,17 +123,20 @@ const Footer = () => {
 
     console.log(controller.notes);
 
+    const volumeNode = new Tone.Volume(volume/2).toDestination();
+    (window as any).volumeNode = volumeNode;
+
     controller.notes
       .sort((a, b) => a._positionX - b._positionX)
       .forEach((note) => {
         const noteNote = noteScale[note._positionY];
         if (!synths[noteNote]) {
-          synths[noteNote] = new Tone.Synth().toDestination();
+          synths[noteNote] = new Tone.Synth().connect(volumeNode);
         }
-        console.log("note._positionX", note._positionX);
+        /*console.log("note._positionX", note._positionX);
         console.log(
           `triggerAttackRelease(${noteNote}, ${step * note._size}, ${start + step * note._positionX})`,
-        );
+        );*/
         synths[noteNote].triggerAttackRelease(
           noteNote,
           step * note._size,
@@ -177,7 +180,10 @@ const Footer = () => {
             max="100"
             value={volume}
             className="slider range cursor-pointer accent-white/5"
-            onChange={(e) => setVolume(parseInt(e.target.value))}
+            onChange={(e) => {
+              (window as any).volumeNode?.volume?.rampTo(parseInt(e.target.value)/2, 0.1);
+              setVolume(parseInt(e.target.value));
+            }}
           />
         </div>
 
