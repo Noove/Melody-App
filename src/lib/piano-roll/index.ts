@@ -1,5 +1,5 @@
 import usePlaybackState from "../state.ts";
-import Note from "./note.ts";
+import Note, { notes as noteKinds } from "./note.ts";
 import * as Tone from "tone";
 
 function parseLetterNotes(notes: string) {
@@ -79,11 +79,14 @@ class PianoRollController {
 
   private handleMouseWheel(e: WheelEvent) {
     if (e.ctrlKey) {
+      // Offset is limited from 0 to 84
       if (e.deltaY < 0) {
-        this._cellOffsetY += 1;
+        this._cellOffsetY = Math.min(0, this._cellOffsetY + 1);
       } else {
-        this._cellOffsetY -= 1;
+        this._cellOffsetY = Math.max(-48, this._cellOffsetY - 1);
       }
+
+      console.log(this._cellOffsetY);
 
       this.notes.forEach((note) => (note._offsetY = this._cellOffsetY));
     } else {
@@ -146,10 +149,6 @@ class PianoRollController {
 
   // Draw the background grid together with the header background
   private drawGrid() {
-    // Header is a red rectangle
-    this._ctx.fillStyle = "red";
-    this._ctx.fillRect(0, 0, this._canvas.width, this._headerHeight);
-
     // Horizontal lines
     for (let i = 0; i < this._cellHeightCount; i++) {
       this._ctx.fillStyle = i % 2 === 0 ? "rgb(15,15,15)" : "rgb(20,20,20";
@@ -172,11 +171,20 @@ class PianoRollController {
       this._ctx.lineTo(i * this._cellWidth, this._canvas.height);
       this._ctx.stroke();
     }
+  }
 
-    // DEBUG TEXT
-    this._ctx.font = "48px serif";
-    this._ctx.fillStyle = "#ffffff";
-    this._ctx.fillText(this.isDragging + "", 50, 50);
+  // Draw the note guide on the left side
+  private drawNoteGuide() {
+    this._ctx.font = "32px new-science-extended";
+    this._ctx.fillStyle = "rgba(255,255,255,0.2)";
+
+    for (let i = 0; i < this._cellHeightCount; i++) {
+      this._ctx.fillText(
+        noteKinds[i - this._cellOffsetY],
+        10,
+        i * this._cellHeight + 40 + this._headerHeight,
+      );
+    }
   }
 
   // Draw the playhead
@@ -410,6 +418,8 @@ class PianoRollController {
     }
 
     this.drawPlayhead();
+
+    this.drawNoteGuide();
 
     requestAnimationFrame(this.draw.bind(this));
   }
