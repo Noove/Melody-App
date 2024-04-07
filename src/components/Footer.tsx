@@ -166,7 +166,7 @@ const Footer = () => {
           />
         </div>
 
-        <span className="mb-1 mr-5 flex justify-self-center text-2xl">
+        <span className="mb-1 mr-5 flex w-full max-w-44 justify-self-center text-2xl">
           {humanTime}
         </span>
 
@@ -185,7 +185,10 @@ const Footer = () => {
             className="mr-2 h-12 w-16 rounded-md bg-white/10 text-center text-white"
             type="number"
             value={bpm}
-            onChange={(e) => setBpm(parseInt(e.target.value))}
+            onChange={(e) => {
+              setBpm(parseInt(e.target.value));
+              (window as any).controller.setBPM(parseInt(e.target.value));
+            }}
           />
           <span className="text-white">BPM</span>
         </div>

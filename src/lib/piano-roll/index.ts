@@ -278,6 +278,10 @@ class PianoRollController {
     }
   }
 
+  public setBPM(bpm: number) {
+    this.bpm = bpm;
+  }
+
   public draw() {
     this.drawGrid();
 
